@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:instagramclone/Screens/login_screen.dart';
@@ -22,11 +23,35 @@ class MyApp extends StatelessWidget {
       //the banner at upper right corner will be disaper
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: mobileBackgroundColor
+        scaffoldBackgroundColor: mobileBackgroundColor,
       ),
       title: "Instagram Clone",
-      //home: ResponsiveLayout(webScreenLayout: WebScreenLayout(), mobileScreenLayout: MobileScreenLayout()),
-      home: LoginScreen(),
+      home: StreamBuilder(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if(snapshot.connectionState== ConnectionState.active){
+            if(snapshot.hasData){
+               return  ResponsiveLayout(
+                webScreenLayout: WebScreenLayout(), 
+                mobileScreenLayout: MobileScreenLayout()
+              );
+            }
+            else if(snapshot.hasError){
+              return Center(
+                child: Text('${snapshot.error}',),
+              );
+            }
+          }
+          if(snapshot.connectionState==ConnectionState.waiting){
+            return const Center(
+              child: CircularProgressIndicator(
+                color: primaryColor,
+              ),
+            );
+          }
+          return LoginScreen();
+        },
+      ),
     );
   }
 }

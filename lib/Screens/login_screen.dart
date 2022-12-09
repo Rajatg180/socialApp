@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:instagramclone/Resorces/auth_methods.dart';
+import 'package:instagramclone/Screens/signup_screen.dart';
 import 'package:instagramclone/Widgets/textfield_input.dart';
 import 'package:instagramclone/utils/colors.dart';
 import 'package:instagramclone/utils/utils.dart';
+
+import '../responsive/mobile_screen_layout.dart';
+import '../responsive/responsive_layout_screen.dart';
+import '../responsive/web_screen_layout.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -36,8 +41,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   );
     
     if(res=="success"){
-      print(res);
-      showSnackBar(res, context);
+      //if login is successfull moveing to next screen
+      Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) =>  ResponsiveLayout(
+                webScreenLayout: WebScreenLayout(), 
+                mobileScreenLayout: MobileScreenLayout()
+              )
+      ),
+    );
     }
     else{
       showSnackBar(res, context);
@@ -48,6 +60,14 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading=false;
     });
   }
+
+  //function for moving to signup screen
+  void navigateToSignUp(){
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: ((context) => const SignUpScreen()))
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,7 +149,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     padding: EdgeInsets.symmetric(vertical: 8),
                   ),
                   GestureDetector(
-                    onTap: () => null,
+                    onTap: navigateToSignUp,
                     child: Container(
                       child: Text(
                         "Sign up",
