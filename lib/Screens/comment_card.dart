@@ -1,9 +1,13 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class CommentCard extends StatefulWidget {
-  const CommentCard({super.key});
+  final snap;
+  const CommentCard({
+   required this.snap,
+  });
 
   @override
   State<CommentCard> createState() => _CommentCardState();
@@ -12,13 +16,14 @@ class CommentCard extends StatefulWidget {
 class _CommentCardState extends State<CommentCard> {
   @override
   Widget build(BuildContext context) {
+    print(widget.snap);
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 8),
       child: Row(
         children: [
           CircleAvatar(
             radius: 20,
-            backgroundImage: AssetImage("assets/profileImage.png"),
+            backgroundImage: NetworkImage(widget.snap['profilePic']),
           ),
           Expanded(
             child: Padding(
@@ -33,13 +38,13 @@ class _CommentCardState extends State<CommentCard> {
                       text: TextSpan(
                         children: [
                           TextSpan(
-                            text: "Username",
+                            text: widget.snap['name'],
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           TextSpan(
-                            text: "  Some comment by the user",
+                            text: ' ${widget.snap['text']}',
                           ),
                         ],
                       ),
@@ -48,8 +53,11 @@ class _CommentCardState extends State<CommentCard> {
                   Padding(
                     padding: EdgeInsets.all(5),
                     child: Text(
-                      "12/11/22",
-                       style: TextStyle(
+                        DateFormat.yMMMd().format(
+                          //converting to DateTime
+                           widget.snap['datePublished'].toDate(),
+                        ),
+                        style: TextStyle(
                           color: Colors.grey
                        ),
                      ),

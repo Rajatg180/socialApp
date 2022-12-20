@@ -1,25 +1,29 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:instagramclone/Models/users.dart';
 import 'package:instagramclone/Provider/user_provider.dart';
 import 'package:instagramclone/Resorces/firestore_methods.dart';
 import 'package:instagramclone/Screens/comment_card.dart';
 import 'package:instagramclone/utils/colors.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class CommentsScreen extends StatefulWidget {
-  final String profImage;
-  final String description;
-  final String date;
-  final String userName;
-  final String postId;
-  final String uid;
+  // final String profImage;
+  // final String description;
+  // final String date;
+  // final String userName;
+  // final String postId;
+  // final String uid;
+  final snap;
   const CommentsScreen({
-    required this.profImage,
-    required this.description,
-    required this.date,
-    required this.userName,
-    required this.postId,
-    required this.uid,
+    // required this.profImage,
+    // required this.description,
+    // required this.date,
+    // required this.userName,
+    // required this.postId,
+    // required this.uid,
+    required this.snap,
   });
 
   @override
@@ -52,7 +56,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
             children: [
               CircleAvatar(
                 radius: 20,
-                backgroundImage: NetworkImage(widget.profImage),
+                backgroundImage: NetworkImage(widget.snap['profImage']),
               ),
               Expanded(
                 child: Padding(
@@ -67,13 +71,13 @@ class _CommentsScreenState extends State<CommentsScreen> {
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: widget.userName,
+                                text: widget.snap['username'],
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               TextSpan(
-                                text: ' ${widget.description}',
+                                text: ' ${widget.snap['description']}',
                               ),
                             ],
                           ),
@@ -82,7 +86,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
                       Padding(
                         padding: EdgeInsets.all(5),
                         child: Text(
-                          widget.date,
+                           DateFormat.yMMMd().format(widget.snap['datePublished'].toDate()),
                            style: TextStyle(
                               color: Colors.grey
                            ),
@@ -98,7 +102,26 @@ class _CommentsScreenState extends State<CommentsScreen> {
           Divider(
                color: Colors.grey,
           ),
-          CommentCard(),
+          Expanded(
+            child: StreamBuilder(
+              stream: FirebaseFirestore.instance.collection('posts').doc(widget.snap['postId']).collection('comments').orderBy(descending: true,'datePublished').snapshots(),
+              builder: (context, snapshot) {
+                if(snapshot.connectionState==ConnectionState.waiting){
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                return ListView.builder(
+                  itemCount: (snapshot.data! as dynamic).docs.length,
+                  itemBuilder: (context, index) {
+                    return  CommentCard(
+                      snap: (snapshot.data! as dynamic).docs[index].data(),
+                    );
+                  }
+                );
+              },
+            ),
+          ),
         ],
       ),
       bottomNavigationBar: SafeArea(
@@ -129,7 +152,10 @@ class _CommentsScreenState extends State<CommentsScreen> {
               ),
               IconButton(
                 onPressed: () async {
-                   await FirestoreMethod().postComment(widget.postId,_commentController.text,widget.uid,widget.userName,widget.profImage);
+                  await FirestoreMethod().postComment(widget.snap['postId'],_commentController.text,widget.snap['uid'],widget.snap['username'],widget.snap['profImage']); 
+                  setState(() {
+                    _commentController.text="";
+                  });
                 }, 
                 icon: Icon(
                   Icons.send,

@@ -62,6 +62,7 @@ class FirestoreMethod{
       else{
         await _firestore.collection('posts').doc(postId).update({
           'likes': FieldValue.arrayUnion([uid]),
+          // 'description': "maza pillu maza gondas balllll",
         });
 
       }
@@ -86,6 +87,17 @@ class FirestoreMethod{
       }else{
         print("Text is Empty");
       }
+     }
+     catch(e){
+       print(e.toString());
+     }
+   }
+
+
+   //Deleting post 
+   Future<void> deletePost(String postId)async{
+     try{
+      await _firestore.collection('posts').doc(postId).delete();
      }
      catch(e){
        print(e.toString());

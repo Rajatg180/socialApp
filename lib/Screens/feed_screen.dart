@@ -26,7 +26,7 @@ class FeedScreen extends StatelessWidget {
       ) ,
       body: StreamBuilder(
         //we want all documents therfore we are using snapshot
-        stream: FirebaseFirestore.instance.collection('posts').snapshots(),
+        stream: FirebaseFirestore.instance.collection('posts').orderBy('datePublished',descending: true).snapshots(),
         builder: (context,  AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>  snapshot){
           if(snapshot.connectionState==ConnectionState.waiting){
             return Center(

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:instagramclone/Provider/user_provider.dart';
 import 'package:instagramclone/Resorces/firestore_methods.dart';
@@ -20,8 +21,24 @@ class PostCard extends StatefulWidget {
 }
 
 class _PostCardState extends State<PostCard> {
-
+  
   bool isLikeAnimating=false;
+  int comment=0;
+  @override 
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getComments();
+  } 
+  void getComments() async{
+    //get will give list of docs
+    QuerySnapshot snap=await FirebaseFirestore.instance.collection('posts').doc(widget.snap['postId']).collection('comments').get();
+    setState(() {
+      comment=snap.docs.length;
+    });
+    
+  }
+
   @override
   Widget build(BuildContext context) {
     final Users user=Provider.of<UserProvider>(context).getUser;
@@ -75,7 +92,10 @@ class _PostCardState extends State<PostCard> {
                                     children: ['Delete', 'Report']
                                         .map(
                                           (e) => InkWell(
-                                            onTap: () => null,
+                                            onTap: e=='Delete'?()async{
+                                              Navigator.of(context).pop();
+                                              await FirestoreMethod().deletePost(widget.snap['postId']);
+                                            }:null ,
                                             child: Container(
                                               padding: EdgeInsets.symmetric(
                                                   horizontal: 16, vertical: 12,
@@ -173,7 +193,7 @@ class _PostCardState extends State<PostCard> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => CommentsScreen(profImage: widget.snap['profImage'],description: widget.snap['description'],date :DateFormat.yMMMd().format(widget.snap['datePublished'].toDate(),),userName: widget.snap['username'],postId: widget.snap['postId'],uid: widget.snap['uid'],)
+                      builder: (context) => CommentsScreen(snap: widget.snap,),
                     ),
                   );
                 }),
@@ -251,7 +271,7 @@ class _PostCardState extends State<PostCard> {
                     vertical: 4
                   ),
                   child: Text(
-                    "view all 24 comments",
+                    "view all ${comment} comments",
                     style: const TextStyle(
                       fontSize: 16,
                       color: secondaryColor,
